@@ -1,7 +1,7 @@
 import pandas as pd
 
 # Load Excel file
-df = pd.read_excel("NIBRSPublicView2024.xlsx", nrows=200000, usecols=["StreetName", "NIBRSDescription", "Premise", "ZIPCode", "MapLongitude"], dtype={"ZIPCode": str})
+df = pd.read_excel("NIBRSPublicView2024.xlsx", nrows=2000, usecols=["StreetName", "NIBRSDescription", "Premise", "ZIPCode", "MapLongitude"], dtype={"ZIPCode": str})
 
 
 # Define the street and crime type you want to check

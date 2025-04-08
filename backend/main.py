@@ -33,7 +33,7 @@ for zipcode in crime_counts_by_type["ZIPCode"].unique():
         highest_crime = total_crime
         ABUNAI_ZIPCODE = zipcode
 
-    print(f"\n📍 ZIP Code: {zipcode} - Total Crime: {total_crime}")
+    print(f"\n ZIP Code: {zipcode} - Total Crime: {total_crime}")
     crimes_in_zip = crime_counts_by_type[crime_counts_by_type["ZIPCode"] == zipcode]
     for _, row in crimes_in_zip.iterrows():
         print(f"   - {row['NIBRSDescription']}: {row['Crime Count']} crimes")
