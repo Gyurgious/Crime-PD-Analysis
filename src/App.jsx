@@ -8,7 +8,7 @@ function App() {
   return (
     <>
       <div>
-        <h1 className="title">Houston City Map</h1>
+        <h1 className="title">Houston City Zip Code Map</h1>
         <MapComponent />
 
       </div>

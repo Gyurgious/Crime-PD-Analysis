@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { MapContainer, TileLayer, GeoJSON, useMap } from "react-leaflet";
+import { MapContainer, TileLayer, GeoJSON } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 
 const MapComponent = () => {
@@ -7,7 +7,7 @@ const MapComponent = () => {
 
   // Load ZIP code GeoJSON
   useEffect(() => {
-    fetch("/houston-tx_.geojson") // Ensure this file is inside the public/ folder
+    fetch("/htown-zipcodes.geojson") // Ensure this file is inside the public/ folder
       .then((response) => response.json())
       .then((data) => {
         setGeoData(data);
@@ -15,64 +15,45 @@ const MapComponent = () => {
       .catch((error) => console.error("Error loading GeoJSON:", error));
   }, []);
 
+  // Style function to adjust stroke width
+  const geoJsonStyle = (feature) => {
+    return {
+      weight: 1, // Set the stroke width here (1 is thinner)
+      color: "blue", // Stroke color
+      opacity: 1, // Opacity of the border
+      fillColor: "lightblue", // Fill color for the polygons
+      fillOpacity: 0.5, // Fill opacity
+    };
+  };
+
+  // Handle GeoJSON features (add popups, etc.)
+  const onEachFeature = (feature, layer) => {
+    if (feature.properties && feature.properties.ZIPCODE) {
+      layer.bindPopup(`<strong>ZIP Code:</strong> ${feature.properties.ZIPCODE}`);
+    }
+  };
+
+  if (!geoData) {
+    return <p>Loading map...</p>;
+  }
+
   return (
-    <MapContainer style={{ height: "100vh", width: "100%" }} zoom={10}>
+    <MapContainer
+      center={[29.7604, -95.3698]} // Houston's latitude and longitude
+      zoom={10}
+      style={{ height: "100vh", width: "100%" }} // Full height and width
+    >
       <TileLayer
         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        attribution='&copy; OpenStreetMap contributors'
       />
-
-      {/* Apply Auto-Zoom to ZIP Code Boundaries */}
-      {geoData && <AutoZoom geoData={geoData} />}
-      {geoData && (
-        <GeoJSON
-          data={geoData}
-          style={() => ({
-            color: "blue",
-            weight: 2,
-            fillColor: "lightblue",
-            fillOpacity: 0.3,
-          })}
-          onEachFeature={(feature, layer) => {
-            const zipCode = feature.properties.ZIPCode || "Unknown";
-            layer.bindPopup(`<b>ZIP Code:</b> ${zipCode}`);
-          }}
-        />
-      )}
+      <GeoJSON
+        data={geoData}
+        onEachFeature={onEachFeature}
+        style={geoJsonStyle} // Apply the style to the GeoJSON
+      />
     </MapContainer>
   );
-};
-
-// ** Auto-zoom to Fit ZIP Code Boundaries **
-const AutoZoom = ({ geoData }) => {
-  const map = useMap();
-
-  useEffect(() => {
-    if (!geoData || !geoData.features || geoData.features.length === 0) return;
-
-    // Collect all polygon coordinates
-    const bounds = [];
-    geoData.features.forEach((feature) => {
-      if (feature.geometry.type === "Polygon") {
-        feature.geometry.coordinates[0].forEach((coord) => {
-          bounds.push([coord[1], coord[0]]); // Leaflet expects [lat, lng]
-        });
-      } else if (feature.geometry.type === "MultiPolygon") {
-        feature.geometry.coordinates.forEach((polygon) => {
-          polygon[0].forEach((coord) => {
-            bounds.push([coord[1], coord[0]]);
-          });
-        });
-      }
-    });
-
-    // Apply fitBounds if boundaries exist
-    if (bounds.length > 0) {
-      map.fitBounds(bounds);
-    }
-  }, [geoData, map]);
-
-  return null;
 };
 
 export default MapComponent;
